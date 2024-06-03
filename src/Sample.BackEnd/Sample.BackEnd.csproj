@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Sample.BackEnd-2c40a264-5497-404e-b81b-21b6ff308501</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit.SqlTransport.PostgreSQL" Version="8.2.3-develop.1831" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sample.Components\Sample.Components.csproj" />
+    <ProjectReference Include="..\Sample.ServiceDefaults\Sample.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>
