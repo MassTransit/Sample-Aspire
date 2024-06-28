@@ -17,7 +17,7 @@ public class ProcessOrderConsumer :
 
     public Task Consume(ConsumeContext<ProcessOrder> context)
     {
-        _logger.LogInformation("Processing Order {OrderId} for {CustomerNumber}", context.Message.OrderId, context.Message.CustomerNumber);
+        _logger.LogInformation("Processing {CustomerNumber,-20} Order {OrderId}", context.Message.CustomerNumber, context.Message.OrderId);
 
         return Task.CompletedTask;
     }

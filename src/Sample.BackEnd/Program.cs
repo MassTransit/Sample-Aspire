@@ -7,25 +7,19 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var connectionString = builder.Configuration.GetConnectionString("postgres");
+var connectionString = builder.Configuration.GetConnectionString("sample");
 
 builder.Services.AddOptions<SqlTransportOptions>()
     .Configure(options =>
     {
-        // this is temporary, later version of MT fixes this breakout from connection string
-        var pg = new NpgsqlConnectionStringBuilder(connectionString);
-
-        options.Host = pg.Host;
-        options.Port = pg.Port;
-        options.Username = pg.Username;
-        options.Password = pg.Password;
-        
-        options.Database = "transport";
-        options.Schema = "transport";
-        options.Role = "transport";
+        options.ConnectionString = connectionString;
     });
 
-builder.Services.AddPostgresMigrationHostedService();
+builder.Services.AddPostgresMigrationHostedService(options =>
+{
+    // default, but shown for completeness
+    options.CreateDatabase = true;
+});
 
 builder.Services.AddMassTransit(x =>
 {
@@ -36,6 +30,9 @@ builder.Services.AddMassTransit(x =>
         if (cfg is ISqlReceiveEndpointConfigurator sql)
         {
             sql.LockDuration = TimeSpan.FromMinutes(10);
+
+            // Ensure messages are consumed in order within a partition
+            // Prevents head-of-line blocking across customers
             sql.SetReceiveMode(SqlReceiveMode.PartitionedOrdered);
         }
     });
@@ -45,9 +42,9 @@ builder.Services.AddMassTransit(x =>
     x.UsingPostgres((context, cfg) =>
     {
         cfg.UseSqlMessageScheduler();
-        
-        cfg.UsePublishFilter(typeof(CustomerNumberHeaderFilter<>), context);
-        cfg.UseSendFilter(typeof(CustomerNumberHeaderFilter<>), context);
+
+        cfg.UsePublishFilter(typeof(CustomerNumberPartitionKeyFilter<>), context);
+        cfg.UseSendFilter(typeof(CustomerNumberPartitionKeyFilter<>), context);
         cfg.ConfigureEndpoints(context);
     });
 });

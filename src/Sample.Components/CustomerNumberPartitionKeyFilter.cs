@@ -6,14 +6,14 @@ using MassTransit;
 using MassTransit.Internals;
 
 
-public class CustomerNumberHeaderFilter<T> :
+public class CustomerNumberPartitionKeyFilter<T> :
     IFilter<SendContext<T>>,
     IFilter<PublishContext<T>>
     where T : class
 {
     static readonly ReadOnlyProperty<T, string>? _property;
 
-    static CustomerNumberHeaderFilter()
+    static CustomerNumberPartitionKeyFilter()
     {
         if (IsCustomerMessage(out var propertyInfo))
             _property = new ReadOnlyProperty<T, string>(propertyInfo);

@@ -1,0 +1,1 @@
+public record OrderInfoModel(Guid OrderId, DateTime Submitted);
