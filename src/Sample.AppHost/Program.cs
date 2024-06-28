@@ -1,5 +1,4 @@
 using Projects;
-using Sample.AppHost;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
