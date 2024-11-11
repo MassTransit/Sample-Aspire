@@ -12,12 +12,22 @@ var postgres = builder.AddPostgres("postgres",
 
 var backEndDb = postgres.AddDatabase("sample", "sample");
 
+// var username = builder.AddParameter("username", secret: false);
+// var password = builder.AddParameter("password", secret: true);
+
+var rabbitMq = builder.AddRabbitMQ("messaging")
+    .WithManagementPlugin();
+
 var backEnd = builder.AddProject<Sample_BackEnd>("SampleBackEnd")
     .WithReference(backEndDb)
-    .WaitFor(postgres);
+    .WithReference(rabbitMq)
+    .WaitFor(postgres)
+    .WaitFor(rabbitMq);
 
 var api = builder.AddProject<Sample_Api>("SampleApi")
     .WithReference(backEndDb)
-    .WaitFor(postgres);
+    .WithReference(rabbitMq)
+    .WaitFor(postgres)
+    .WaitFor(rabbitMq);
 
 builder.Build().Run();

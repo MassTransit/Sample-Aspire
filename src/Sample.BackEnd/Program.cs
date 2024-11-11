@@ -7,19 +7,19 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var connectionString = builder.Configuration.GetConnectionString("sample");
+//var connectionString = builder.Configuration.GetConnectionString("sample");
 
-builder.Services.AddOptions<SqlTransportOptions>()
-    .Configure(options =>
-    {
-        options.ConnectionString = connectionString;
-    });
-
-builder.Services.AddPostgresMigrationHostedService(options =>
-{
-    // default, but shown for completeness
-    options.CreateDatabase = true;
-});
+// builder.Services.AddOptions<SqlTransportOptions>()
+//     .Configure(options =>
+//     {
+//         options.ConnectionString = connectionString;
+//     });
+//
+// builder.Services.AddPostgresMigrationHostedService(options =>
+// {
+//     // default, but shown for completeness
+//     options.CreateDatabase = true;
+// });
 
 builder.Services.AddMassTransit(x =>
 {
@@ -37,11 +37,17 @@ builder.Services.AddMassTransit(x =>
         }
     });
 
-    x.AddSqlMessageScheduler();
+//    x.AddSqlMessageScheduler();
+    x.AddDelayedMessageScheduler();
 
-    x.UsingPostgres((context, cfg) =>
+//    x.UsingPostgres((context, cfg) =>
+    x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.UseSqlMessageScheduler();
+        var connectionString = builder.Configuration.GetConnectionString("messaging");
+        cfg.Host(connectionString);
+
+        cfg.UseDelayedMessageScheduler();
+        //cfg.UseSqlMessageScheduler();
 
         cfg.UsePublishFilter(typeof(CustomerNumberPartitionKeyFilter<>), context);
         cfg.UseSendFilter(typeof(CustomerNumberPartitionKeyFilter<>), context);

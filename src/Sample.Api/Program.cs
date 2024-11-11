@@ -9,21 +9,27 @@ builder.Services.AddSwaggerGen();
 
 builder.AddServiceDefaults();
 
-var connectionString = builder.Configuration.GetConnectionString("sample");
-
-builder.Services.AddOptions<SqlTransportOptions>()
-    .Configure(options =>
-    {
-        options.ConnectionString = connectionString;
-    });
-
+// var connectionString = builder.Configuration.GetConnectionString("sample");
+//
+// builder.Services.AddOptions<SqlTransportOptions>()
+//     .Configure(options =>
+//     {
+//         options.ConnectionString = connectionString;
+//     });
+//
 builder.Services.AddMassTransit(x =>
 {
-    x.AddSqlMessageScheduler();
+//    x.AddSqlMessageScheduler();
+x.AddDelayedMessageScheduler();
 
-    x.UsingPostgres((context, cfg) =>
+    x.UsingRabbitMq((context, cfg) =>
+    //x.UsingPostgres((context, cfg) =>
     {
-        cfg.UseSqlMessageScheduler();
+        var connectionString = builder.Configuration.GetConnectionString("messaging");
+        cfg.Host(connectionString);
+        
+        //cfg.UseSqlMessageScheduler();
+        cfg.UseDelayedMessageScheduler();
 
         cfg.UsePublishFilter(typeof(CustomerNumberPartitionKeyFilter<>), context);
         cfg.UseSendFilter(typeof(CustomerNumberPartitionKeyFilter<>), context);
