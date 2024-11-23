@@ -14,10 +14,12 @@ var backEndDb = postgres.AddDatabase("sample", "sample");
 
 var backEnd = builder.AddProject<Sample_BackEnd>("SampleBackEnd")
     .WithReference(backEndDb)
-    .WaitFor(postgres);
+    .WaitFor(postgres)
+    .WaitFor(backEndDb);
 
 var api = builder.AddProject<Sample_Api>("SampleApi")
     .WithReference(backEndDb)
-    .WaitFor(postgres);
+    .WaitFor(postgres)
+    .WaitFor(backEndDb);
 
 builder.Build().Run();
